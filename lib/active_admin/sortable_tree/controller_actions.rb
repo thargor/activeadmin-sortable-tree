@@ -31,11 +31,11 @@ module ActiveAdmin::SortableTree
         errors = []
         ActiveRecord::Base.transaction do
           records.each_with_index do |(record, parent_record), position|
-            record.send "#{options[:sorting_attribute]}=", position
+            record.update_columns({options[:sorting_attribute].to_sym => position+1})
             if options[:tree]
               record.send "#{options[:parent_method]}=", parent_record
+              errors << {record.id => record.errors} if !record.save
             end
-            errors << {record.id => record.errors} if !record.save
           end
         end
         if errors.empty?
